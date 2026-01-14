@@ -10,7 +10,7 @@ pip install -r requirements-demo.txt
 # Setup dbt profile
 mkdir -p ~/.dbt
 cat > ~/.dbt/profiles.yml << 'EOF'
-jaffle_shop:
+default:
   target: dev
   outputs:
     dev:
@@ -22,6 +22,8 @@ EOF
 # Run dbt to build the models
 echo "📊 Building dbt models..."
 dbt deps
+echo "🌱 Seeding source data..."
+dbt seed --vars 'load_source_data: true'
 dbt build
 
 # Initialize git if not already done
@@ -36,7 +38,6 @@ echo "✅ Setup complete!"
 echo ""
 echo "Try these commands:"
 echo "  dbt-conceptual status          # View coverage"
-echo "  dbt-conceptual serve           # Launch UI (opens on port 5000)"
 echo "  dbt-conceptual validate        # Validate conceptual model"
 echo "  dbt-conceptual export --format excalidraw -o diagram.excalidraw"
 echo ""

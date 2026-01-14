@@ -32,7 +32,11 @@ seeds:
 
 models:
   jaffle_shop:
-    staging:
-      +materialized: view
-    marts:
+    silver:
       +materialized: table
+      +tags:
+        - layer:silver
+    gold:
+      +materialized: table
+      +tags:
+        - layer:gold

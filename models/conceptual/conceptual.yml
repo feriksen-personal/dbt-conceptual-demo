@@ -11,6 +11,16 @@ domains:
     display_name: Transaction Domain
     color: "#FFF3E0"
 
+  product:
+    name: Product
+    display_name: Product Domain
+    color: "#E8F5E9"
+
+  location:
+    name: Location
+    display_name: Location Domain
+    color: "#FCE4EC"
+
 concepts:
   customer:
     name: Customer
@@ -26,11 +36,32 @@ concepts:
     definition: "A purchase transaction made by a customer, containing one or more items"
     status: complete
 
-  payment:
-    name: Payment
+  order_item:
+    name: Order Item
     domain: transaction
     owner: analytics_team
-    definition: "A financial transaction associated with an order"
+    definition: "A line item within an order representing a product purchased"
+    status: complete
+
+  product:
+    name: Product
+    domain: product
+    owner: analytics_team
+    definition: "A food or drink item sold at the jaffle shop"
+    status: complete
+
+  location:
+    name: Location
+    domain: location
+    owner: analytics_team
+    definition: "A physical store location"
+    status: complete
+
+  supply:
+    name: Supply
+    domain: product
+    owner: analytics_team
+    definition: "Raw materials used to make products"
     status: complete
 
 relationships:
@@ -40,14 +71,26 @@ relationships:
     cardinality: "1:N"
     description: "A customer places zero or more orders"
 
-  - name: pays_for
-    from: customer
-    to: payment
+  - name: contains
+    from: order
+    to: order_item
     cardinality: "1:N"
-    description: "A customer makes zero or more payments"
+    description: "An order contains one or more order items"
 
-  - name: payment_for
-    from: payment
-    to: order
+  - name: is_for
+    from: order_item
+    to: product
     cardinality: "N:1"
-    description: "A payment is for exactly one order"
+    description: "An order item is for exactly one product"
+
+  - name: fulfilled_at
+    from: order
+    to: location
+    cardinality: "N:1"
+    description: "An order is fulfilled at one location"
+
+  - name: requires
+    from: product
+    to: supply
+    cardinality: "N:M"
+    description: "A product requires one or more supplies"

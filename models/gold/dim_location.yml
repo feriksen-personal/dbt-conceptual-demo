@@ -1,8 +1,13 @@
+models:
+  - name: dim_location
+    meta:
+      concept: location
+
 semantic_models:
-  - name: locations
+  - name: dim_location
     description: |
       Location dimension table. The grain of the table is one row per location.
-    model: ref('locations')
+    model: ref('dim_location')
     defaults:
       agg_time_dimension: opened_date
     entities:

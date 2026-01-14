@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(devcontainer up:*)",
+      "Bash(docker:*)",
+      "Bash(npm install:*)",
+      "Bash(open:*)",
+      "Bash(open -a \"Docker\")"
+    ]
+  }
+}

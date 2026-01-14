@@ -8,7 +8,7 @@ customers as (
 
 orders as (
 
-    select * from {{ ref('orders') }}
+    select * from {{ ref('fact_order') }}
 
 ),
 

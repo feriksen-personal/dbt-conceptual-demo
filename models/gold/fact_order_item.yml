@@ -1,5 +1,10 @@
 models:
-  - name: order_items
+  - name: fact_order_item
+    meta:
+      concept: order_item
+      realizes:
+        - order:contains:order_item
+        - order_item:is_for:product
     columns:
       - name: order_item_id
         data_tests:
@@ -8,13 +13,13 @@ models:
       - name: order_id
         data_tests:
           - relationships:
-              to: ref('orders')
+              to: ref('fact_order')
               field: order_id
 
 unit_tests:
   - name: test_supply_costs_sum_correctly
     description: "Test that the counts of drinks and food orders convert to booleans properly."
-    model: order_items
+    model: fact_order_item
     given:
       - input: ref('stg_supplies')
         rows:
@@ -41,12 +46,12 @@ unit_tests:
         - { order_id: 2, product_id: 2, supply_cost: 8.50 }
 
 semantic_models:
-  - name: order_item
+  - name: fact_order_item
     defaults:
       agg_time_dimension: ordered_at
     description: |
       Items contatined in each order. The grain of the table is one row per order item.
-    model: ref('order_items')
+    model: ref('fact_order_item')
     entities:
       - name: order_item
         type: primary

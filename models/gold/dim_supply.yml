@@ -1,10 +1,15 @@
+models:
+  - name: dim_supply
+    meta:
+      concept: supply
+
 semantic_models:
   #The name of the semantic model.
-  - name: supplies
+  - name: dim_supply
     description: |
       Supplies dimension table. The grain of the table is one row per supply and product combination.
     #The name of the dbt model and schema
-    model: ref('supplies')
+    model: ref('dim_supply')
     #Entities. These usually corespond to keys in the table.
     entities:
       - name: supply
