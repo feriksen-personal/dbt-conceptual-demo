@@ -1,0 +1,5 @@
+# dbt with DuckDB adapter
+dbt-duckdb>=1.7.0
+
+# dbt-conceptual with UI support
+dbt-conceptual[serve]>=0.1.0

@@ -34,21 +34,21 @@ Features:
 "
 
 # Push to GitHub
-git remote add origin https://github.com/YOUR_USERNAME/dbt-conceptual-demo.git
+git remote add origin https://github.com/feriksen-personal/dbt-conceptual-demo.git
 git branch -M main
 git push -u origin main
 ```
 
 ### 3. Enable GitHub Actions
 
-1. Go to https://github.com/YOUR_USERNAME/dbt-conceptual-demo/settings/actions
+1. Go to https://github.com/feriksen-personal/dbt-conceptual-demo/settings/actions
 2. Under "Actions permissions" select "Allow all actions and reusable workflows"
 3. Click "Save"
 
 ### 4. Test It
 
 **Test Codespaces:**
-1. Go to https://github.com/YOUR_USERNAME/dbt-conceptual-demo
+1. Go to https://github.com/feriksen-personal/dbt-conceptual-demo
 2. Click green "Code" button → "Codespaces" tab
 3. Click "Create codespace on main"
 4. Wait for setup (~2-3 minutes)
@@ -57,9 +57,9 @@ git push -u origin main
 
 **Test Locally:**
 ```bash
-git clone https://github.com/YOUR_USERNAME/dbt-conceptual-demo.git
+git clone https://github.com/feriksen-personal/dbt-conceptual-demo.git
 cd dbt-conceptual-demo
-pip install -r requirements.txt
+pip install -r requirements-demo.txt
 bash .devcontainer/setup.sh
 dbt-conceptual serve
 ```
@@ -119,7 +119,7 @@ Add this to your main dbt-conceptual README:
 
 Experience dbt-conceptual with a fully configured demo:
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/YOUR_USERNAME/dbt-conceptual-demo?quickstart=1)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/feriksen-personal/dbt-conceptual-demo?quickstart=1)
 
 The demo includes:
 - Pre-configured conceptual model with Party and Transaction domains
@@ -127,7 +127,7 @@ The demo includes:
 - Interactive web UI for editing
 - One-click launch in GitHub Codespaces
 
-See [dbt-conceptual-demo](https://github.com/YOUR_USERNAME/dbt-conceptual-demo) for details.
+See [dbt-conceptual-demo](https://github.com/feriksen-personal/dbt-conceptual-demo) for details.
 ```
 
 ## Maintenance
@@ -135,15 +135,15 @@ See [dbt-conceptual-demo](https://github.com/YOUR_USERNAME/dbt-conceptual-demo) 
 ### Update dbt-conceptual Version
 
 ```bash
-# In requirements.txt, update version
+# In requirements-demo.txt, update version
 dbt-conceptual[serve]>=0.2.0
 
 # Test
-pip install -r requirements.txt --upgrade
+pip install -r requirements-demo.txt --upgrade
 dbt-conceptual serve
 
 # Commit and push
-git add requirements.txt
+git add requirements-demo.txt
 git commit -m "Update dbt-conceptual to v0.2.0"
 git push
 ```
