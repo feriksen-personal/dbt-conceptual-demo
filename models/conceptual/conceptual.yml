@@ -1,0 +1,53 @@
+version: 1
+
+domains:
+  party:
+    name: Party
+    display_name: Party Domain
+    color: "#E3F2FD"
+
+  transaction:
+    name: Transaction
+    display_name: Transaction Domain
+    color: "#FFF3E0"
+
+concepts:
+  customer:
+    name: Customer
+    domain: party
+    owner: analytics_team
+    definition: "A person or entity that places orders at the jaffle shop"
+    status: complete
+
+  order:
+    name: Order
+    domain: transaction
+    owner: analytics_team
+    definition: "A purchase transaction made by a customer, containing one or more items"
+    status: complete
+
+  payment:
+    name: Payment
+    domain: transaction
+    owner: analytics_team
+    definition: "A financial transaction associated with an order"
+    status: complete
+
+relationships:
+  - name: places
+    from: customer
+    to: order
+    cardinality: "1:N"
+    description: "A customer places zero or more orders"
+
+  - name: pays_for
+    from: customer
+    to: payment
+    cardinality: "1:N"
+    description: "A customer makes zero or more payments"
+
+  - name: payment_for
+    from: payment
+    to: order
+    cardinality: "N:1"
+    description: "A payment is for exactly one order"

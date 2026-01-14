@@ -1,0 +1,51 @@
+name: Validate Conceptual Model
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: dbt-conceptual validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Setup dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          jaffle_shop:
+            target: dev
+            outputs:
+              dev:
+                type: duckdb
+                path: jaffle_shop.duckdb
+                threads: 4
+          EOF
+
+      - name: Build dbt models
+        run: |
+          dbt deps
+          dbt build
+
+      - name: Validate conceptual model
+        run: |
+          dbt-conceptual validate
+
+      - name: Show coverage
+        run: |
+          dbt-conceptual status
