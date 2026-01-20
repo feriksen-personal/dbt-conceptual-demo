@@ -1,8 +1,6 @@
 {{
     config(
-        alias='dim_campaign',
-        materialized='incremental',
-        unique_key='campaign_sk'
+        alias='dim_campaign'
     )
 }}
 

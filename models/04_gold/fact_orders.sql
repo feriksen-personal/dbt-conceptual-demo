@@ -1,8 +1,6 @@
 {{
     config(
-        alias='fact_orders',
-        materialized='incremental',
-        unique_key='order_sk'
+        alias='fact_orders'
     )
 }}
 

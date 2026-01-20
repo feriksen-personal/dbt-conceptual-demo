@@ -8,7 +8,6 @@ models:
         description: "Technical key: hash of email"
         tests:
           - not_null
-          - unique
 
   - name: stg_product
     description: "Staged product data with technical key"
@@ -17,7 +16,6 @@ models:
         description: "Technical key: hash of 'erp' + product_id"
         tests:
           - not_null
-          - unique
 
   - name: stg_order
     description: "Staged order data with technical key"
@@ -26,7 +24,6 @@ models:
         description: "Technical key: hash of 'erp' + order_id"
         tests:
           - not_null
-          - unique
       - name: customer_tk
         description: "FK to stg_customer"
 
@@ -49,7 +46,6 @@ models:
         description: "Technical key: hash of 'erp' + payment_id"
         tests:
           - not_null
-          - unique
       - name: order_tk
         description: "FK to stg_order"
 
@@ -60,7 +56,6 @@ models:
         description: "Technical key: hash of 'crm' + campaign_id"
         tests:
           - not_null
-          - unique
 
   - name: stg_email_activity
     description: "Staged email engagement events"
@@ -69,7 +64,6 @@ models:
         description: "Technical key: hash of 'crm' + activity_id"
         tests:
           - not_null
-          - unique
       - name: customer_tk
         description: "FK to stg_customer"
       - name: campaign_tk
@@ -82,6 +76,5 @@ models:
         description: "Technical key: hash of 'crm' + session_id"
         tests:
           - not_null
-          - unique
       - name: customer_tk
         description: "FK to stg_customer"

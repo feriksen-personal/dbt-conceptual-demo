@@ -11,5 +11,9 @@ select
     created_at,
     updated_at,
     deleted_at,
-    deleted_at is not null as is_deleted
+    deleted_at is not null as is_deleted,
+    md5(coalesce(first_name, '') || '|' || coalesce(last_name, '')) as customer_hd,
+    -- metadata
+    _loaded_at as load_ts,
+    'erp.jaffle_shop.' || _pipeline_run_id as record_source
 from bronze

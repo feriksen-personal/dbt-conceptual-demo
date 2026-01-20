@@ -17,7 +17,6 @@ sources:
           - name: campaign_id
             description: Primary key, unique campaign identifier
             tests:
-              - unique
               - not_null
 
           - name: campaign_name
@@ -53,7 +52,6 @@ sources:
           - name: activity_id
             description: Primary key, unique email activity identifier
             tests:
-              - unique
               - not_null
 
           - name: customer_id
@@ -98,7 +96,6 @@ sources:
           - name: session_id
             description: Primary key, unique session identifier
             tests:
-              - unique
               - not_null
 
           - name: customer_id

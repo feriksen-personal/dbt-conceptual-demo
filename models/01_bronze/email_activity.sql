@@ -1,10 +1,3 @@
-{{
-    config(
-        materialized='incremental',
-        unique_key='activity_id'
-    )
-}}
-
 select
     activity_id,
     customer_id,
@@ -20,5 +13,5 @@ select
     current_timestamp as _loaded_at
 from {{ source('jaffle_crm', 'email_activity') }}
 {% if is_incremental() %}
-where updated_at > (select max(updated_at) from {{ this }})
+where coalesce(created_at, updated_at) > (select max(coalesce(created_at, updated_at)) from {{ this }})
 {% endif %}

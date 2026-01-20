@@ -1,8 +1,6 @@
 {{
     config(
-        alias='dim_product',
-        materialized='incremental',
-        unique_key='product_sk'
+        alias='dim_product'
     )
 }}
 

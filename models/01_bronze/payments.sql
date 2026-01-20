@@ -1,10 +1,3 @@
-{{
-    config(
-        materialized='incremental',
-        unique_key='payment_id'
-    )
-}}
-
 select
     payment_id,
     order_id,
@@ -18,5 +11,5 @@ select
     current_timestamp as _loaded_at
 from {{ source('jaffle_shop', 'payments') }}
 {% if is_incremental() %}
-where updated_at > (select max(updated_at) from {{ this }})
+where coalesce(created_at, updated_at) > (select max(coalesce(created_at, updated_at)) from {{ this }})
 {% endif %}

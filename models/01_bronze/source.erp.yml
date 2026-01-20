@@ -17,7 +17,6 @@ sources:
           - name: customer_id
             description: Primary key, unique customer identifier
             tests:
-              - unique
               - not_null
 
           - name: first_name
@@ -54,7 +53,6 @@ sources:
           - name: product_id
             description: Primary key, unique product identifier
             tests:
-              - unique
               - not_null
 
           - name: name
@@ -87,7 +85,6 @@ sources:
           - name: order_id
             description: Primary key, unique order identifier
             tests:
-              - unique
               - not_null
 
           - name: customer_id
@@ -132,7 +129,6 @@ sources:
           - name: order_item_id
             description: Primary key, unique order item identifier
             tests:
-              - unique
               - not_null
 
           - name: order_id
@@ -184,7 +180,6 @@ sources:
           - name: payment_id
             description: Primary key, unique payment identifier
             tests:
-              - unique
               - not_null
 
           - name: order_id

@@ -16,7 +16,11 @@ select
     bronze.created_at,
     bronze.updated_at,
     bronze.deleted_at,
-    bronze.deleted_at is not null as is_deleted
+    bronze.deleted_at is not null as is_deleted,
+    md5(coalesce(cast(bronze.order_id as varchar), '') || '|' || coalesce(bronze.payment_method, '') || '|' || coalesce(cast(bronze.amount as varchar), '')) as payment_hd,
+    -- metadata
+    bronze._loaded_at as load_ts,
+    'erp.jaffle_shop.' || bronze._pipeline_run_id as record_source
 from bronze
 left join orders
     on bronze.order_id = orders.order_source_id

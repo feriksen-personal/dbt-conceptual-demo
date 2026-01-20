@@ -1,8 +1,6 @@
 {{
     config(
-        alias='fact_customer_engagement',
-        materialized='incremental',
-        unique_key='engagement_sk'
+        alias='fact_customer_engagement'
     )
 }}
 
