@@ -1,0 +1,91 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: "L2 Conformed customer dimension"
+    meta:
+      concept: customer
+    columns:
+      - name: customer_sk
+        description: "Surrogate key"
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_product
+    description: "L2 Conformed product dimension"
+    # NOTE: No meta.concept - this is intentional for Exercise 2
+    columns:
+      - name: product_sk
+        description: "Surrogate key"
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_campaign
+    description: "L2 Conformed campaign dimension"
+    meta:
+      concept: campaign
+    columns:
+      - name: campaign_sk
+        description: "Surrogate key"
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_date
+    description: "L2 Conformed date dimension"
+    meta:
+      concept: date
+    columns:
+      - name: date_sk
+        description: "Surrogate key"
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_orders
+    description: "L2 Integrated orders fact"
+    meta:
+      concept: orders
+    columns:
+      - name: order_sk
+        description: "Surrogate key"
+        tests:
+          - not_null
+          - unique
+      - name: customer_sk
+        tests:
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_sk
+      - name: order_date_sk
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_sk
+
+  - name: fact_customer_engagement
+    description: "L2 Unified engagement fact (web + email)"
+    meta:
+      concept: customer_engagement
+    columns:
+      - name: engagement_sk
+        description: "Surrogate key"
+        tests:
+          - not_null
+          - unique
+      - name: customer_sk
+        tests:
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_sk
+
+  - name: obt_customer_360
+    description: "One Big Table: customer with all metrics"
+    # NOTE: No meta.concept - it's a reporting artifact, not a concept
+    columns:
+      - name: customer_sk
+        tests:
+          - not_null
+          - unique
