@@ -1,10 +1,8 @@
 {
-  "name": "dbt-conceptual Demo",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "18"
-    }
+  "name": "dbt-conceptual-demo",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
   "customizations": {
@@ -13,22 +11,21 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "bastienboutonnet.vscode-dbt",
-        "innoverio.vscode-dbt-power-user",
-        "anthropic.claude-code"
+        "innoverio.vscode-dbt-power-user"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "python.linting.enabled": true,
-        "python.formatting.provider": "black",
-        "editor.formatOnSave": true,
-        "python.terminal.useEnvFile": true
+        "python.defaultInterpreterPath": "/usr/local/bin/python"
       }
     }
   },
-  "forwardPorts": [5000],
+  "forwardPorts": [5000, 5050],
   "portsAttributes": {
     "5000": {
       "label": "dbt-conceptual UI",
+      "onAutoForward": "openBrowser"
+    },
+    "5050": {
+      "label": "dbt docs",
       "onAutoForward": "openBrowser"
     }
   }

@@ -1,11 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Setting up dbt-conceptual demo environment..."
-
-# Install Python dependencies
-pip install --upgrade pip
-pip install -r requirements-demo.txt
+echo "Setting up dbt-conceptual demo environment..."
 
 # Setup dbt profile
 mkdir -p ~/.dbt
@@ -20,24 +16,20 @@ default:
 EOF
 
 # Run dbt to build the models
-echo "📊 Building dbt models..."
+echo "Installing dbt packages..."
 dbt deps
-echo "🌱 Seeding source data..."
-dbt seed --vars 'load_source_data: true'
+
+echo "Loading source data..."
+dbt run-operation load_baseline
+
+echo "Building dbt models..."
 dbt build
 
-# Initialize git if not already done
-if [ ! -d .git ]; then
-  git init
-  git add .
-  git commit -m "Initial commit"
-fi
-
 echo ""
-echo "✅ Setup complete!"
+echo "Setup complete!"
 echo ""
 echo "Try these commands:"
 echo "  dbt-conceptual status          # View coverage"
 echo "  dbt-conceptual validate        # Validate conceptual model"
-echo "  dbt-conceptual export --format excalidraw -o diagram.excalidraw"
+echo "  dbt-conceptual serve           # Launch UI at http://localhost:5000"
 echo ""

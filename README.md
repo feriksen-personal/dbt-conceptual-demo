@@ -1,140 +1,182 @@
-# dbt-conceptual Demo
+# dbt-conceptual-demo
 
-> **Try [dbt-conceptual](https://github.com/feriksen-personal/dbt-conceptual) with a live demo using the jaffle-shop project**
+Demonstrates [dbt-conceptual](https://github.com/feriksen-personal/dbt-conceptual) with realistic source data.
 
-This repository demonstrates dbt-conceptual with dbt-labs' jaffle-shop example project, pre-configured with a conceptual model.
+<p align="center">
+  <img src="docs/assets/dbt-conceptual-icon.svg" width="80" alt="dbt-conceptual" />
+</p>
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/feriksen-personal/dbt-conceptual-demo?quickstart=1)
+**Source data powered by [dbt-source-simulator](https://github.com/feriksen-personal/dbt-source-simulator)**
 
-## What's This?
+---
 
-**dbt-conceptual** bridges the gap between your conceptual data model and your dbt implementation. This demo shows:
-
-- ✅ Conceptual model defined in YAML
-- ✅ dbt models tagged with `meta.concept` and `meta.realizes`
-- ✅ Interactive web UI for editing
-- ✅ Coverage reports showing implementation status
-- ✅ Bus matrix showing which facts realize relationships
-- ✅ CI validation
-
-## Quick Start
-
-### Option 1: GitHub Codespaces (Recommended)
-
-Click the badge above to launch in Codespaces. Everything is pre-configured!
-
-Once the container starts:
+## Quick Start (5 min)
 
 ```bash
-# View coverage
-dbt-conceptual status
-
-# Launch interactive UI
-dbt-conceptual serve
-# Opens automatically on port 5000
-
-# Validate
-dbt-conceptual validate
-
-# Export diagrams
-dbt-conceptual export --format excalidraw -o diagram.excalidraw
-dbt-conceptual export --format coverage -o coverage.html
-dbt-conceptual export --format bus-matrix -o bus-matrix.html
-```
-
-### Option 2: Local Setup
-
-```bash
-# Clone
+# Clone and setup
 git clone https://github.com/feriksen-personal/dbt-conceptual-demo.git
 cd dbt-conceptual-demo
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 
-# Install
-pip install -r requirements-demo.txt
+# Install dbt packages
+dbt deps
 
-# Setup dbt profile (DuckDB)
-mkdir -p ~/.dbt
-cat > ~/.dbt/profiles.yml << 'EOF'
-jaffle_shop:
-  target: dev
-  outputs:
-    dev:
-      type: duckdb
-      path: jaffle_shop.duckdb
-      threads: 4
-EOF
+# Load source data
+dbt run-operation load_baseline
 
 # Build dbt models
-dbt deps
 dbt build
 
-# Try dbt-conceptual
+# Sync conceptual model
+dbt-conceptual sync
+
+# See coverage status
 dbt-conceptual status
+```
+
+**Expected output:**
+```
+DRAFT:  payment (concept defined, no model)
+STUB:   product (discovered, needs definition)
+✓       customer, orders, campaign, ...
+
+Coverage: 11/13 concepts complete (85%)
+```
+
+**Optionally**, explore visually:
+```bash
 dbt-conceptual serve
 ```
 
-## What's Included
+PLACEHOLDER:SCREENSHOT_UI_STATUS
 
-### Conceptual Model
+---
 
-The conceptual model is defined in [`models/conceptual/conceptual.yml`](models/conceptual/conceptual.yml):
+## Conceptual Model
 
-- **Domains**: `party`, `transaction`
-- **Concepts**: `customer`, `order`, `payment`
-- **Relationships**: `customer:places:order`, `customer:pays_for:payment`, `payment:payment_for:order`
+<p align="center">
+  <img src="docs/assets/conceptual-model.svg" alt="Conceptual Model" />
+</p>
 
-### dbt Models Tagged
+---
 
-The dbt models are tagged to link them to concepts:
+## Explore More
 
-```yaml
-# models/marts/customers.yml
-models:
-  - name: customers
-    meta:
-      concept: customer
+### Exercise 1: Complete the DRAFT concept (payment)
 
-# models/marts/orders.yml
-models:
-  - name: orders
-    meta:
-      realizes:
-        - customer:places:order
+The `payment` concept is defined in `conceptual.yml` but has no model implementation. This represents **top-down modeling**: the business concept exists, implementation follows.
+
+**Option A: Use the UI**
+```bash
+dbt-conceptual serve
+```
+Navigate to Concepts → payment → Add Implementation
+
+PLACEHOLDER:SCREENSHOT_UI_PAYMENT
+
+**Option B: Edit YAML directly**
+
+Create `models/gold/fact_payments.sql` and add the concept reference to `gold.schema.yml`.
+
+<details>
+<summary>Show complete solution</summary>
+
+See `docs/exercises/exercise-1-payment.md`
+
+</details>
+
+---
+
+### Exercise 2: Enrich the STUB concept (product)
+
+The `product` models exist (`dim_product_erp`, `dim_product`) but the concept definitions are missing from `conceptual.yml`. This represents **bottom-up modeling**: implementation exists, concept documentation follows.
+
+Run sync to see the stub:
+```bash
+dbt-conceptual sync --create-stubs
+dbt-conceptual status
 ```
 
-### Interactive UI
+**Option A: Use the UI**
+```bash
+dbt-conceptual serve
+```
+Navigate to Concepts → product (stub) → Enrich
 
-Launch with `dbt-conceptual serve` to get:
+PLACEHOLDER:SCREENSHOT_UI_PRODUCT_STUB
 
-- **Graph Editor** - Visual drag-and-drop editor with D3.js force-directed layout
-- **Coverage Report** - See which concepts are implemented
-- **Bus Matrix** - See which fact tables realize relationships
-- Direct editing and saving to `conceptual.yml`
+**Option B: Edit YAML directly**
+
+Add `product_erp` and `product` concepts to `models/conceptual/conceptual.yml`.
+
+<details>
+<summary>Show complete solution</summary>
+
+See `docs/exercises/exercise-2-product.md`
+
+</details>
+
+---
+
+### Reports
+
+**Coverage Report:**
+```bash
+dbt-conceptual export --format coverage
+```
+
+PLACEHOLDER:SCREENSHOT_COVERAGE_REPORT
+
+**Bus Matrix:**
+```bash
+dbt-conceptual export --format bus-matrix
+```
+
+PLACEHOLDER:SCREENSHOT_BUS_MATRIX
+
+---
+
+### CI/CD Integration
+
+This project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that:
+
+1. Builds all dbt models
+2. Validates the conceptual model
+3. Posts coverage summary to the PR
+
+PLACEHOLDER:SCREENSHOT_GITHUB_ACTION
+
+---
+
+## Want to test SCD2 handling?
+
+The source data evolves over time. Run the delta operations to see dimension changes:
+
+```bash
+dbt run-operation apply_delta --args '{day: 1}'
+dbt run-operation apply_delta --args '{day: 2}'
+dbt run-operation apply_delta --args '{day: 3}'
+dbt build --select dim_customer_erp+
+```
+
+Watch `dim_customer_erp` handle late-arriving changes, updates, and soft deletes.
+
+---
 
 ## Project Structure
 
 ```
-dbt-conceptual-demo/
-├── .devcontainer/          # GitHub Codespaces config
-├── .github/workflows/      # CI validation
-├── models/
-│   ├── conceptual/
-│   │   └── conceptual.yml  # ⭐ Your conceptual model
-│   ├── marts/
-│   │   ├── customers.yml   # Tagged with meta.concept
-│   │   ├── orders.yml      # Tagged with meta.realizes
-│   │   └── ...
-│   └── ...
-├── dbt_project.yml
-└── requirements-demo.txt
+models/
+├── bronze/           # Source definitions
+├── staging/          # Views with technical keys
+├── silver/           # L1 dimensional models (per source system)
+├── gold/             # L2 integrated star schema
+└── conceptual/       # dbt-conceptual definitions
 ```
 
-## Learn More
-
-- **dbt-conceptual**: https://github.com/feriksen-personal/dbt-conceptual
-- **Documentation**: See main repo README
-- **jaffle-shop**: https://github.com/dbt-labs/jaffle-shop
+---
 
 ## License
 
-This demo is MIT licensed. The jaffle-shop project is from dbt-labs.
+MIT
