@@ -4,7 +4,7 @@
     )
 }}
 
-with source as (
+with sessions as (
     select * from {{ ref('stg_web_session') }}
     {% if is_incremental() %}
     where updated_at > (select max(updated_at) from {{ this }})
@@ -25,27 +25,24 @@ cte_customer as (
 )
 
 select
-    source.web_session_tk,
-    source.customer_tk,
+    -- dimension keys (customer)
+    sessions.customer_tk,
     cte_customer.customer_hk,
-    source.session_source_id,
-    source.session_start,
-    source.session_end,
-    source.page_views,
+    -- fact timeline
+    cast(sessions.session_start as date) as session_date,
+    -- measures
+    sessions.session_start,
+    sessions.session_end,
+    sessions.page_views,
     case
-        when source.session_end is not null
-        then extract(epoch from (source.session_end - source.session_start)) / 60.0
+        when sessions.session_end is not null
+        then extract(epoch from (sessions.session_end - sessions.session_start)) / 60.0
         else null
     end as session_duration_minutes,
-    source.created_at,
-    source.updated_at,
-    source.deleted_at,
-    source.is_deleted,
-    source.web_session_hd,
     -- metadata
-    source.load_ts,
-    source.record_source
-from source
+    sessions.load_ts,
+    sessions.record_source
+from sessions
 left join cte_customer
-    on source.customer_tk = cte_customer.customer_tk
-    and cast(source.session_start as date) between cte_customer.valid_from and cte_customer.valid_to
+    on sessions.customer_tk = cte_customer.customer_tk
+    and cast(sessions.session_start as date) between cte_customer.valid_from and cte_customer.valid_to

@@ -34,3 +34,16 @@ select
     load_ts,
     record_source
 from source
+{% if is_incremental() %}
+where source.campaign_hd != (
+    select existing.campaign_hd
+    from {{ this }} existing
+    where existing.campaign_tk = source.campaign_tk
+    order by existing.valid_from desc
+    limit 1
+)
+or not exists (
+    select 1 from {{ this }} existing
+    where existing.campaign_tk = source.campaign_tk
+)
+{% endif %}

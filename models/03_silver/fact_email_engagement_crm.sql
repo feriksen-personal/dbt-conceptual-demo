@@ -4,7 +4,7 @@
     )
 }}
 
-with source as (
+with emails as (
     select * from {{ ref('stg_email_activity') }}
     {% if is_incremental() %}
     where updated_at > (select max(updated_at) from {{ this }})
@@ -38,32 +38,28 @@ cte_campaign as (
 )
 
 select
-    source.email_activity_tk,
-    source.customer_tk,
+    -- dimension keys (customer -> campaign)
+    emails.customer_tk,
     cte_customer.customer_hk,
-    source.campaign_tk,
+    emails.campaign_tk,
     cte_campaign.campaign_hk,
-    source.activity_source_id,
-    source.sent_date,
-    source.opened,
-    source.clicked,
+    -- fact timeline
+    emails.sent_date,
+    -- measures
+    emails.opened,
+    emails.clicked,
     case
-        when source.clicked then 'clicked'
-        when source.opened then 'opened'
+        when emails.clicked then 'clicked'
+        when emails.opened then 'opened'
         else 'sent'
     end as engagement_level,
-    source.created_at,
-    source.updated_at,
-    source.deleted_at,
-    source.is_deleted,
-    source.email_activity_hd,
     -- metadata
-    source.load_ts,
-    source.record_source
-from source
+    emails.load_ts,
+    emails.record_source
+from emails
 left join cte_customer
-    on source.customer_tk = cte_customer.customer_tk
-    and source.sent_date between cte_customer.valid_from and cte_customer.valid_to
+    on emails.customer_tk = cte_customer.customer_tk
+    and emails.sent_date between cte_customer.valid_from and cte_customer.valid_to
 left join cte_campaign
-    on source.campaign_tk = cte_campaign.campaign_tk
-    and source.sent_date between cte_campaign.valid_from and cte_campaign.valid_to
+    on emails.campaign_tk = cte_campaign.campaign_tk
+    and emails.sent_date between cte_campaign.valid_from and cte_campaign.valid_to
