@@ -9,8 +9,11 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Install Python dependencies (dbt, dbt-duckdb, dbt-conceptual)
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --upgrade pip \
     && pip install -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
+
+# Verify dbt is installed and available
+RUN dbt --version

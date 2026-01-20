@@ -16,7 +16,8 @@
         "anthropic.claude-code"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python"
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "dbt.dbtPythonPathOverride": "/usr/local/bin/python"
       }
     }
   },
