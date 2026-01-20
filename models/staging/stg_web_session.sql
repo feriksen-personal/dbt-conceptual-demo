@@ -1,5 +1,5 @@
-with source as (
-    select * from {{ source('jaffle_crm', 'web_sessions') }}
+with bronze as (
+    select * from {{ ref('web_sessions') }}
 ),
 
 customers as (
@@ -7,17 +7,17 @@ customers as (
 )
 
 select
-    {{ dbt_utils.generate_surrogate_key(["'crm'", 'source.session_id']) }} as web_session_tk,
+    {{ dbt_utils.generate_surrogate_key(["'crm'", 'bronze.session_id']) }} as web_session_tk,
     customers.customer_tk,
-    source.session_id as session_source_id,
-    source.customer_id as customer_source_id,
-    source.session_start,
-    source.session_end,
-    source.page_views,
-    source.created_at,
-    source.updated_at,
-    source.deleted_at,
-    source.deleted_at is not null as is_deleted
-from source
+    bronze.session_id as session_source_id,
+    bronze.customer_id as customer_source_id,
+    bronze.session_start,
+    bronze.session_end,
+    bronze.page_views,
+    bronze.created_at,
+    bronze.updated_at,
+    bronze.deleted_at,
+    bronze.deleted_at is not null as is_deleted
+from bronze
 left join customers
-    on source.customer_id = customers.customer_source_id
+    on bronze.customer_id = customers.customer_source_id

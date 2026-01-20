@@ -1,5 +1,5 @@
-with source as (
-    select * from {{ source('jaffle_shop', 'order_items') }}
+with bronze as (
+    select * from {{ ref('order_items') }}
 ),
 
 orders as (
@@ -13,18 +13,18 @@ products as (
 select
     orders.order_tk,
     products.product_tk,
-    source.order_item_id as order_item_source_id,
-    source.order_id as order_source_id,
-    source.product_id as product_source_id,
-    source.quantity,
-    source.unit_price,
-    source.quantity * source.unit_price as line_total,
-    source.created_at,
-    source.updated_at,
-    source.deleted_at,
-    source.deleted_at is not null as is_deleted
-from source
+    bronze.order_item_id as order_item_source_id,
+    bronze.order_id as order_source_id,
+    bronze.product_id as product_source_id,
+    bronze.quantity,
+    bronze.unit_price,
+    bronze.quantity * bronze.unit_price as line_total,
+    bronze.created_at,
+    bronze.updated_at,
+    bronze.deleted_at,
+    bronze.deleted_at is not null as is_deleted
+from bronze
 left join orders
-    on source.order_id = orders.order_source_id
+    on bronze.order_id = orders.order_source_id
 left join products
-    on source.product_id = products.product_source_id
+    on bronze.product_id = products.product_source_id

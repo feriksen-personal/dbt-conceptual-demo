@@ -3,24 +3,17 @@ set -e
 
 echo "Setting up dbt-conceptual demo environment..."
 
-# Setup dbt profile
-mkdir -p ~/.dbt
-cat > ~/.dbt/profiles.yml << 'EOF'
-default:
-  target: dev
-  outputs:
-    dev:
-      type: duckdb
-      path: jaffle_shop.duckdb
-      threads: 4
-EOF
+# Create data directory
+mkdir -p data
 
 # Run dbt to build the models
 echo "Installing dbt packages..."
 dbt deps
 
 echo "Loading source data..."
-dbt run-operation load_baseline
+# Use origin_load_baseline for initial setup (creates tables and loads data)
+# For subsequent runs, use: dbt run-operation origin_reset --profile ingestion_simulator
+dbt run-operation origin_load_baseline --profile ingestion_simulator
 
 echo "Building dbt models..."
 dbt build

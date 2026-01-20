@@ -1,5 +1,5 @@
-with source as (
-    select * from {{ source('jaffle_shop', 'products') }}
+with bronze as (
+    select * from {{ ref('products') }}
 )
 
 select
@@ -12,4 +12,4 @@ select
     updated_at,
     deleted_at,
     deleted_at is not null as is_deleted
-from source
+from bronze

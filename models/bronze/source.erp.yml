@@ -5,8 +5,8 @@ sources:
     description: >
       E-commerce and order management system with transactional data.
       Managed by dbt-source-simulator package.
-    database: jaffle_shop
-    schema: erp
+    database: sources
+    schema: jaffle_shop
 
     tables:
       - name: customers

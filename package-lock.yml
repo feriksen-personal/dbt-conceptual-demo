@@ -1,0 +1,8 @@
+packages:
+  - name: dbt_utils
+    package: dbt-labs/dbt_utils
+    version: 1.3.3
+  - git: https://github.com/feriksen-personal/dbt-source-simulator
+    name: dbt_source_simulator
+    revision: 282a8320488d8e2256959b38efee0b98e5d600d2
+sha1_hash: 2dddf0c7ec076120c0e4a59d9ec2c799da525bd7

@@ -5,8 +5,8 @@ sources:
     description: >
       Marketing and CRM system with campaign and engagement tracking data.
       Managed by dbt-source-simulator package.
-    database: jaffle_crm
-    schema: crm
+    database: sources
+    schema: jaffle_crm
 
     tables:
       - name: campaigns

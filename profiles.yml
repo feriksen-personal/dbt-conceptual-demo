@@ -1,7 +1,21 @@
+# Main project profile - target warehouse for dbt models
 dbt_conceptual_demo:
   target: dev
   outputs:
     dev:
       type: duckdb
-      path: 'target/demo.duckdb'
+      path: 'data/warehouse.duckdb'
+      threads: 4
+      attach:
+        - path: 'data/sources.duckdb'
+          alias: sources
+
+# Source simulator profile - simulated source systems (ERP, CRM)
+# Usage: dbt run-operation origin_reset --profile ingestion_simulator
+ingestion_simulator:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'data/sources.duckdb'
       threads: 4

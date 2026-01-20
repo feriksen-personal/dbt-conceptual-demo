@@ -1,5 +1,5 @@
-with source as (
-    select * from {{ source('jaffle_crm', 'campaigns') }}
+with bronze as (
+    select * from {{ ref('campaigns') }}
 )
 
 select
@@ -13,4 +13,4 @@ select
     updated_at,
     deleted_at,
     deleted_at is not null as is_deleted
-from source
+from bronze

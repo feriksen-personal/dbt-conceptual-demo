@@ -1,5 +1,5 @@
-with source as (
-    select * from {{ source('jaffle_shop', 'payments') }}
+with bronze as (
+    select * from {{ ref('payments') }}
 ),
 
 orders as (
@@ -7,16 +7,16 @@ orders as (
 )
 
 select
-    {{ dbt_utils.generate_surrogate_key(["'erp'", 'source.payment_id']) }} as payment_tk,
+    {{ dbt_utils.generate_surrogate_key(["'erp'", 'bronze.payment_id']) }} as payment_tk,
     orders.order_tk,
-    source.payment_id as payment_source_id,
-    source.order_id as order_source_id,
-    source.payment_method,
-    source.amount,
-    source.created_at,
-    source.updated_at,
-    source.deleted_at,
-    source.deleted_at is not null as is_deleted
-from source
+    bronze.payment_id as payment_source_id,
+    bronze.order_id as order_source_id,
+    bronze.payment_method,
+    bronze.amount,
+    bronze.created_at,
+    bronze.updated_at,
+    bronze.deleted_at,
+    bronze.deleted_at is not null as is_deleted
+from bronze
 left join orders
-    on source.order_id = orders.order_source_id
+    on bronze.order_id = orders.order_source_id

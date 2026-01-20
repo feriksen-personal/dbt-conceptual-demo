@@ -25,7 +25,6 @@ vars:
 
     # List of folders for staging/silver layer models
     silver_paths:
-      - "models/staging"
       - "models/silver"
 
     # List of folders for gold/marts layer models
@@ -33,15 +32,28 @@ vars:
       - "models/gold"
 
 # =============================================================================
-# Model materializations
+# Model configurations
 # =============================================================================
 models:
   dbt_conceptual_demo:
     bronze:
-      +materialized: view
+      +schema: bronze
+      +materialized: incremental
+      +tags:
+        - bronze
+        - ingestion
     staging:
+      +schema: staging
       +materialized: view
+      +tags:
+        - staging
     silver:
+      +schema: silver
       +materialized: incremental
+      +tags:
+        - silver
     gold:
+      +schema: gold
       +materialized: incremental
+      +tags:
+        - gold
