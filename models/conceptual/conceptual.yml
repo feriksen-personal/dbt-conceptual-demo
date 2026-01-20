@@ -1,0 +1,244 @@
+version: 1
+
+metadata:
+  name: "dbt-conceptual-demo"
+  description: "E-commerce + Marketing dimensional model demonstrating L1/L2 patterns"
+
+# =============================================================================
+# Domains
+# =============================================================================
+domains:
+  party:
+    name: "Party"
+    color: "#E3F2FD"
+
+  product:
+    name: "Product"
+    color: "#F3E5F5"
+
+  transaction:
+    name: "Transaction"
+    color: "#FFF3E0"
+
+  marketing:
+    name: "Marketing"
+    color: "#E8F5E9"
+
+  time:
+    name: "Time"
+    color: "#ECEFF1"
+
+# =============================================================================
+# Concepts
+# =============================================================================
+concepts:
+
+  # ---------------------------------------------------------------------------
+  # L1 ERP Concepts
+  # ---------------------------------------------------------------------------
+  customer_erp:
+    name: "Customer (ERP)"
+    domain: party
+    owner: erp_team
+    definition: "Customer master record from ERP system"
+
+  # NOTE: product_erp intentionally OMITTED - Exercise 2 (STUB)
+  # The model dim_product_erp exists, but concept is missing.
+  # User should add:
+  #
+  # product_erp:
+  #   name: "Product (ERP)"
+  #   domain: product
+  #   owner: erp_team
+  #   definition: "Product catalog from ERP system"
+
+  orders_erp:
+    name: "Orders (ERP)"
+    domain: transaction
+    owner: erp_team
+    definition: "Sales order from ERP system"
+
+  payments_erp:
+    name: "Payments (ERP)"
+    domain: transaction
+    owner: erp_team
+    definition: "Payment transaction from ERP system"
+
+  # ---------------------------------------------------------------------------
+  # L1 CRM Concepts
+  # ---------------------------------------------------------------------------
+  campaign_crm:
+    name: "Campaign (CRM)"
+    domain: marketing
+    owner: marketing_team
+    definition: "Marketing campaign definition from CRM"
+
+  web_sessions_crm:
+    name: "Web Sessions (CRM)"
+    domain: marketing
+    owner: marketing_team
+    definition: "Website visit session from CRM"
+
+  email_engagement_crm:
+    name: "Email Engagement (CRM)"
+    domain: marketing
+    owner: marketing_team
+    definition: "Email interaction event from CRM"
+
+  # ---------------------------------------------------------------------------
+  # L2 Integrated Concepts
+  # ---------------------------------------------------------------------------
+  customer:
+    name: "Customer"
+    domain: party
+    owner: enterprise_data
+    definition: "Conformed customer dimension"
+
+  # NOTE: product intentionally OMITTED - Exercise 2 (STUB)
+  # The model dim_product exists, but concept is missing.
+  # User should add:
+  #
+  # product:
+  #   name: "Product"
+  #   domain: product
+  #   owner: enterprise_data
+  #   definition: "Conformed product dimension"
+
+  campaign:
+    name: "Campaign"
+    domain: marketing
+    owner: enterprise_data
+    definition: "Conformed campaign dimension"
+
+  date:
+    name: "Date"
+    domain: time
+    owner: enterprise_data
+    definition: "Conformed date dimension"
+
+  orders:
+    name: "Orders"
+    domain: transaction
+    owner: enterprise_data
+    definition: "Integrated order fact"
+
+  # Exercise 1: DRAFT - concept exists, no model
+  payment:
+    name: "Payment"
+    domain: transaction
+    owner: enterprise_data
+    definition: "Integrated payment fact"
+    status: draft
+
+  customer_engagement:
+    name: "Customer Engagement"
+    domain: marketing
+    owner: enterprise_data
+    definition: "Unified engagement fact (web + email)"
+
+# =============================================================================
+# Relationships
+# =============================================================================
+relationships:
+
+  # ---------------------------------------------------------------------------
+  # L1 ERP Internal
+  # ---------------------------------------------------------------------------
+  - name: places
+    from: customer_erp
+    to: orders_erp
+    cardinality: "1:N"
+
+  - name: settles
+    from: orders_erp
+    to: payments_erp
+    cardinality: "1:N"
+
+  - name: contains
+    from: orders_erp
+    to: product_erp
+    cardinality: "N:M"
+
+  # ---------------------------------------------------------------------------
+  # L1 CRM Internal
+  # ---------------------------------------------------------------------------
+  - name: drives_email
+    from: campaign_crm
+    to: email_engagement_crm
+    cardinality: "1:N"
+
+  - name: drives_web
+    from: campaign_crm
+    to: web_sessions_crm
+    cardinality: "1:N"
+
+  # ---------------------------------------------------------------------------
+  # L2 Integrated
+  # ---------------------------------------------------------------------------
+  - name: places
+    from: customer
+    to: orders
+    cardinality: "1:N"
+
+  - name: settles
+    from: orders
+    to: payment
+    cardinality: "1:N"
+
+  - name: contains
+    from: orders
+    to: product
+    cardinality: "N:M"
+
+  - name: has_engagement
+    from: customer
+    to: customer_engagement
+    cardinality: "1:N"
+
+  - name: drives
+    from: campaign
+    to: customer_engagement
+    cardinality: "1:N"
+
+  - name: occurs_on_order
+    from: date
+    to: orders
+    cardinality: "1:N"
+
+  - name: occurs_on_engagement
+    from: date
+    to: customer_engagement
+    cardinality: "1:N"
+
+  # ---------------------------------------------------------------------------
+  # L1 → L2 Conversion
+  # ---------------------------------------------------------------------------
+  - name: converts_to
+    from: customer_erp
+    to: customer
+    cardinality: "1:1"
+
+  - name: converts_to
+    from: product_erp
+    to: product
+    cardinality: "1:1"
+
+  - name: converts_to
+    from: campaign_crm
+    to: campaign
+    cardinality: "1:1"
+
+  - name: converts_to
+    from: orders_erp
+    to: orders
+    cardinality: "1:1"
+
+  - name: unifies_to
+    from: web_sessions_crm
+    to: customer_engagement
+    cardinality: "N:1"
+
+  - name: unifies_to
+    from: email_engagement_crm
+    to: customer_engagement
+    cardinality: "N:1"
