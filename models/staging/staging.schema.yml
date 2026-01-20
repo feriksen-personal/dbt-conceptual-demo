@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: stg_customer
+    description: "Staged customer data with technical key"
+    columns:
+      - name: customer_tk
+        description: "Technical key: hash of email"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_product
+    description: "Staged product data with technical key"
+    columns:
+      - name: product_tk
+        description: "Technical key: hash of 'erp' + product_id"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_order
+    description: "Staged order data with technical key"
+    columns:
+      - name: order_tk
+        description: "Technical key: hash of 'erp' + order_id"
+        tests:
+          - not_null
+          - unique
+      - name: customer_tk
+        description: "FK to stg_customer"
+
+  - name: stg_order_item
+    description: "Staged order line items (fact grain)"
+    columns:
+      - name: order_tk
+        description: "FK to stg_order"
+        tests:
+          - not_null
+      - name: product_tk
+        description: "FK to stg_product"
+        tests:
+          - not_null
+
+  - name: stg_payment
+    description: "Staged payment data with technical key"
+    columns:
+      - name: payment_tk
+        description: "Technical key: hash of 'erp' + payment_id"
+        tests:
+          - not_null
+          - unique
+      - name: order_tk
+        description: "FK to stg_order"
+
+  - name: stg_campaign
+    description: "Staged campaign data with technical key"
+    columns:
+      - name: campaign_tk
+        description: "Technical key: hash of 'crm' + campaign_id"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_email_activity
+    description: "Staged email engagement events"
+    columns:
+      - name: email_activity_tk
+        description: "Technical key: hash of 'crm' + activity_id"
+        tests:
+          - not_null
+          - unique
+      - name: customer_tk
+        description: "FK to stg_customer"
+      - name: campaign_tk
+        description: "FK to stg_campaign"
+
+  - name: stg_web_session
+    description: "Staged web session data"
+    columns:
+      - name: web_session_tk
+        description: "Technical key: hash of 'crm' + session_id"
+        tests:
+          - not_null
+          - unique
+      - name: customer_tk
+        description: "FK to stg_customer"
