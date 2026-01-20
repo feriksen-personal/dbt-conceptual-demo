@@ -5,7 +5,13 @@
       "Bash(docker:*)",
       "Bash(npm install:*)",
       "Bash(open:*)",
-      "Bash(open -a \"Docker\")"
+      "Bash(open -a \"Docker\")",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git merge:*)",
+      "Bash(curl:*)",
+      "Bash(git push:*)"
     ]
   }
 }
