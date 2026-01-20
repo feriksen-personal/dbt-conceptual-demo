@@ -1,42 +1,47 @@
+name: 'dbt_conceptual_demo'
+version: '1.0.0'
 config-version: 2
 
-name: "jaffle_shop"
-version: "3.0.0"
-require-dbt-version: ">=1.5.0"
-
-dbt-cloud:
-  project-id: 275557 # Put your project id here
-
-profile: default # Put your profile here
+profile: 'dbt_conceptual_demo'
 
 model-paths: ["models"]
 analysis-paths: ["analyses"]
-test-paths: ["data-tests"]
+test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
-target-path: "target"
 clean-targets:
   - "target"
   - "dbt_packages"
 
+# =============================================================================
+# dbt-conceptual configuration
+# =============================================================================
 vars:
-  "dbt_date:time_zone": "America/Los_Angeles"
+  dbt_conceptual:
+    # Directory where conceptual model definition lives
+    conceptual_path: "models/conceptual"
 
-seeds:
-  jaffle_shop:
-    +schema: raw
-    jaffle-data:
-      +enabled: "{{ var('load_source_data', false) }}"
+    # List of folders for staging/silver layer models
+    silver_paths:
+      - "models/staging"
+      - "models/silver"
 
+    # List of folders for gold/marts layer models
+    gold_paths:
+      - "models/gold"
+
+# =============================================================================
+# Model materializations
+# =============================================================================
 models:
-  jaffle_shop:
+  dbt_conceptual_demo:
+    bronze:
+      +materialized: view
+    staging:
+      +materialized: view
     silver:
-      +materialized: table
-      +tags:
-        - layer:silver
+      +materialized: incremental
     gold:
-      +materialized: table
-      +tags:
-        - layer:gold
+      +materialized: incremental
