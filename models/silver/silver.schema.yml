@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: dim_customer_erp
+    description: "L1 Customer dimension from ERP"
+    meta:
+      concept: customer_erp
+    columns:
+      - name: customer_tk
+        description: "Technical key (surrogate)"
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_product_erp
+    description: "L1 Product dimension from ERP"
+    meta:
+      concept: product_erp
+    columns:
+      - name: product_tk
+        description: "Technical key (surrogate)"
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_campaign_crm
+    description: "L1 Campaign dimension from CRM"
+    meta:
+      concept: campaign_crm
+    columns:
+      - name: campaign_tk
+        description: "Technical key (surrogate)"
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_orders_erp
+    description: "L1 Orders fact from ERP"
+    meta:
+      concept: orders_erp
+    columns:
+      - name: order_tk
+        description: "Technical key (surrogate)"
+        tests:
+          - not_null
+          - unique
+      - name: customer_tk
+        description: "FK to dim_customer_erp"
+        tests:
+          - relationships:
+              to: ref('dim_customer_erp')
+              field: customer_tk
+
+  - name: fact_payments_erp
+    description: "L1 Payments fact from ERP"
+    meta:
+      concept: payments_erp
+    columns:
+      - name: payment_tk
+        description: "Technical key (surrogate)"
+        tests:
+          - not_null
+          - unique
+      - name: order_tk
+        description: "FK to fact_orders_erp"
+
+  - name: fact_web_sessions_crm
+    description: "L1 Web sessions fact from CRM"
+    meta:
+      concept: web_sessions_crm
+    columns:
+      - name: web_session_tk
+        description: "Technical key (surrogate)"
+        tests:
+          - not_null
+          - unique
+      - name: customer_tk
+        description: "FK to dim_customer_erp (cross-system)"
+
+  - name: fact_email_engagement_crm
+    description: "L1 Email engagement fact from CRM"
+    meta:
+      concept: email_engagement_crm
+    columns:
+      - name: email_activity_tk
+        description: "Technical key (surrogate)"
+        tests:
+          - not_null
+          - unique
+      - name: customer_tk
+        description: "FK to dim_customer_erp (cross-system)"
+      - name: campaign_tk
+        description: "FK to dim_campaign_crm"
