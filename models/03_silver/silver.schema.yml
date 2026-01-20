@@ -2,92 +2,226 @@ version: 2
 
 models:
   - name: dim_customer_erp
-    description: "L1 Customer dimension from ERP"
+    description: "L1 Customer dimension from ERP system. Contains customer master data with soft delete support."
     meta:
       concept: customer_erp
     columns:
       - name: customer_tk
-        description: "Technical key (surrogate)"
+        description: "Technical key (surrogate) - hash of email address"
         tests:
           - not_null
           - unique
+      - name: customer_source_id
+        description: "Natural key from ERP source system"
+      - name: email
+        description: "Customer email address - primary business identifier"
+        meta:
+          pii: true
+        tests:
+          - not_null
+      - name: first_name
+        description: "Customer first name"
+        meta:
+          pii: true
+      - name: last_name
+        description: "Customer last name"
+        meta:
+          pii: true
+      - name: full_name
+        description: "Concatenated first and last name"
+        meta:
+          pii: true
+      - name: created_at
+        description: "Timestamp when customer record was created in source"
+      - name: updated_at
+        description: "Timestamp when customer record was last updated in source"
+      - name: deleted_at
+        description: "Soft delete timestamp (NULL = active, non-NULL = deleted)"
+      - name: is_deleted
+        description: "Boolean flag indicating if record is soft deleted"
 
   - name: dim_product_erp
-    description: "L1 Product dimension from ERP"
+    description: "L1 Product dimension from ERP system. Contains product catalog with pricing and categorization."
     meta:
       concept: product_erp
     columns:
       - name: product_tk
-        description: "Technical key (surrogate)"
+        description: "Technical key (surrogate) - hash of source system + product_id"
         tests:
           - not_null
           - unique
+      - name: product_source_id
+        description: "Natural key from ERP source system"
+      - name: product_name
+        description: "Product display name"
+      - name: category
+        description: "Product category for grouping and filtering"
+      - name: price
+        description: "Current product price in base currency"
+      - name: created_at
+        description: "Timestamp when product was added to catalog"
+      - name: updated_at
+        description: "Timestamp when product was last updated (e.g., price change)"
+      - name: deleted_at
+        description: "Soft delete timestamp (NULL = active, non-NULL = discontinued)"
+      - name: is_deleted
+        description: "Boolean flag indicating if product is discontinued"
 
   - name: dim_campaign_crm
-    description: "L1 Campaign dimension from CRM"
+    description: "L1 Campaign dimension from CRM system. Contains marketing campaign definitions with budgets and status."
     meta:
       concept: campaign_crm
     columns:
       - name: campaign_tk
-        description: "Technical key (surrogate)"
+        description: "Technical key (surrogate) - hash of source system + campaign_id"
         tests:
           - not_null
           - unique
+      - name: campaign_source_id
+        description: "Natural key from CRM source system"
+      - name: campaign_name
+        description: "Marketing campaign name/title"
+      - name: start_date
+        description: "Campaign start date"
+      - name: end_date
+        description: "Campaign end date"
+      - name: budget
+        description: "Campaign budget allocation in base currency"
+      - name: campaign_status
+        description: "Derived status: 'planned', 'active', or 'completed' based on dates"
+      - name: created_at
+        description: "Timestamp when campaign was created"
+      - name: updated_at
+        description: "Timestamp when campaign was last updated"
+      - name: deleted_at
+        description: "Soft delete timestamp (NULL = active, non-NULL = archived)"
+      - name: is_deleted
+        description: "Boolean flag indicating if campaign is archived"
 
   - name: fact_orders_erp
-    description: "L1 Orders fact from ERP"
+    description: "L1 Orders fact from ERP system. Order headers with aggregated line item metrics."
     meta:
       concept: orders_erp
     columns:
       - name: order_tk
-        description: "Technical key (surrogate)"
+        description: "Technical key (surrogate) - hash of source system + order_id"
         tests:
           - not_null
           - unique
       - name: customer_tk
-        description: "FK to dim_customer_erp"
+        description: "Foreign key to dim_customer_erp"
         tests:
           - relationships:
               to: ref('dim_customer_erp')
               field: customer_tk
+      - name: order_source_id
+        description: "Natural key from ERP source system"
+      - name: order_date
+        description: "Date when order was placed"
+      - name: order_status
+        description: "Current order status (pending, processing, shipped, delivered, cancelled)"
+      - name: line_count
+        description: "Number of distinct line items in the order"
+      - name: total_quantity
+        description: "Total quantity of all items ordered"
+      - name: order_total
+        description: "Total order value in base currency"
+      - name: created_at
+        description: "Timestamp when order was created"
+      - name: updated_at
+        description: "Timestamp when order was last updated (e.g., status change)"
+      - name: deleted_at
+        description: "Soft delete timestamp (NULL = active, non-NULL = cancelled)"
+      - name: is_deleted
+        description: "Boolean flag indicating if order is cancelled/deleted"
 
   - name: fact_payments_erp
-    description: "L1 Payments fact from ERP"
+    description: "L1 Payments fact from ERP system. Payment transactions linked to orders."
     meta:
       concept: payments_erp
     columns:
       - name: payment_tk
-        description: "Technical key (surrogate)"
+        description: "Technical key (surrogate) - hash of source system + payment_id"
         tests:
           - not_null
           - unique
       - name: order_tk
-        description: "FK to fact_orders_erp"
+        description: "Foreign key to fact_orders_erp"
+      - name: payment_source_id
+        description: "Natural key from ERP source system"
+      - name: payment_method
+        description: "Payment method used (credit_card, debit_card, bank_transfer, cash)"
+      - name: amount
+        description: "Payment amount in base currency"
+      - name: created_at
+        description: "Timestamp when payment was recorded"
+      - name: updated_at
+        description: "Timestamp when payment was last updated"
+      - name: deleted_at
+        description: "Soft delete timestamp (rarely used for payments)"
+      - name: is_deleted
+        description: "Boolean flag indicating if payment is voided"
 
   - name: fact_web_sessions_crm
-    description: "L1 Web sessions fact from CRM"
+    description: "L1 Web sessions fact from CRM system. Website visit tracking with page views and duration."
     meta:
       concept: web_sessions_crm
     columns:
       - name: web_session_tk
-        description: "Technical key (surrogate)"
+        description: "Technical key (surrogate) - hash of source system + session_id"
         tests:
           - not_null
           - unique
       - name: customer_tk
-        description: "FK to dim_customer_erp (cross-system)"
+        description: "Foreign key to dim_customer_erp (cross-system join via email)"
+      - name: session_source_id
+        description: "Natural key from CRM source system"
+      - name: session_start
+        description: "Timestamp when web session started"
+      - name: session_end
+        description: "Timestamp when web session ended (NULL if still active)"
+      - name: page_views
+        description: "Number of pages viewed during the session"
+      - name: session_duration_minutes
+        description: "Calculated session duration in minutes (NULL if session still active)"
+      - name: created_at
+        description: "Timestamp when session was recorded"
+      - name: updated_at
+        description: "Timestamp when session was last updated"
+      - name: deleted_at
+        description: "Soft delete timestamp (rarely used)"
+      - name: is_deleted
+        description: "Boolean flag for soft delete"
 
   - name: fact_email_engagement_crm
-    description: "L1 Email engagement fact from CRM"
+    description: "L1 Email engagement fact from CRM system. Email campaign delivery and interaction tracking."
     meta:
       concept: email_engagement_crm
     columns:
       - name: email_activity_tk
-        description: "Technical key (surrogate)"
+        description: "Technical key (surrogate) - hash of source system + activity_id"
         tests:
           - not_null
           - unique
       - name: customer_tk
-        description: "FK to dim_customer_erp (cross-system)"
+        description: "Foreign key to dim_customer_erp (cross-system join via email)"
       - name: campaign_tk
-        description: "FK to dim_campaign_crm"
+        description: "Foreign key to dim_campaign_crm"
+      - name: activity_source_id
+        description: "Natural key from CRM source system"
+      - name: sent_date
+        description: "Date when email was sent"
+      - name: opened
+        description: "Boolean indicating if email was opened"
+      - name: clicked
+        description: "Boolean indicating if any link in email was clicked"
+      - name: engagement_level
+        description: "Derived engagement level: 'sent', 'opened', or 'clicked'"
+      - name: created_at
+        description: "Timestamp when activity was recorded"
+      - name: updated_at
+        description: "Timestamp when activity was last updated"
+      - name: deleted_at
+        description: "Soft delete timestamp (rarely used)"
+      - name: is_deleted
+        description: "Boolean flag for soft delete"

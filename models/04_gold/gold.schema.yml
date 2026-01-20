@@ -2,90 +2,252 @@ version: 2
 
 models:
   - name: dim_customer
-    description: "L2 Conformed customer dimension"
+    description: "L2 Conformed customer dimension. Enterprise-wide customer master integrated from all source systems."
     meta:
       concept: customer
     columns:
       - name: customer_sk
-        description: "Surrogate key"
+        description: "Surrogate key for enterprise customer dimension"
         tests:
           - not_null
           - unique
+      - name: customer_source_id
+        description: "Natural key from primary source system (ERP)"
+      - name: email
+        description: "Customer email address - primary business identifier and integration key"
+        meta:
+          pii: true
+        tests:
+          - not_null
+      - name: first_name
+        description: "Customer first name"
+        meta:
+          pii: true
+      - name: last_name
+        description: "Customer last name"
+        meta:
+          pii: true
+      - name: full_name
+        description: "Full display name (first + last)"
+        meta:
+          pii: true
+      - name: created_at
+        description: "Timestamp when customer was first created"
+      - name: updated_at
+        description: "Timestamp of most recent update"
+      - name: deleted_at
+        description: "Soft delete timestamp (NULL = active)"
+      - name: is_deleted
+        description: "Boolean flag for soft deleted records"
 
   - name: dim_product
-    description: "L2 Conformed product dimension"
+    description: "L2 Conformed product dimension. Enterprise product catalog."
     # NOTE: No meta.concept - this is intentional for Exercise 2
     columns:
       - name: product_sk
-        description: "Surrogate key"
+        description: "Surrogate key for enterprise product dimension"
         tests:
           - not_null
           - unique
+      - name: product_source_id
+        description: "Natural key from source system"
+      - name: product_name
+        description: "Product display name"
+      - name: category
+        description: "Product category for reporting and filtering"
+      - name: price
+        description: "Current unit price in base currency"
+      - name: created_at
+        description: "Timestamp when product was added"
+      - name: updated_at
+        description: "Timestamp of most recent update"
+      - name: deleted_at
+        description: "Soft delete timestamp (NULL = active, non-NULL = discontinued)"
+      - name: is_deleted
+        description: "Boolean flag indicating discontinued products"
 
   - name: dim_campaign
-    description: "L2 Conformed campaign dimension"
+    description: "L2 Conformed campaign dimension. Marketing campaigns across all channels."
     meta:
       concept: campaign
     columns:
       - name: campaign_sk
-        description: "Surrogate key"
+        description: "Surrogate key for enterprise campaign dimension"
         tests:
           - not_null
           - unique
+      - name: campaign_source_id
+        description: "Natural key from CRM source system"
+      - name: campaign_name
+        description: "Campaign name/title"
+      - name: start_date
+        description: "Campaign start date"
+      - name: end_date
+        description: "Campaign end date"
+      - name: budget
+        description: "Campaign budget in base currency"
+      - name: campaign_status
+        description: "Current status: 'planned', 'active', or 'completed'"
+      - name: created_at
+        description: "Timestamp when campaign was created"
+      - name: updated_at
+        description: "Timestamp of most recent update"
+      - name: deleted_at
+        description: "Soft delete timestamp (NULL = active)"
+      - name: is_deleted
+        description: "Boolean flag for archived campaigns"
 
   - name: dim_date
-    description: "L2 Conformed date dimension"
+    description: "L2 Conformed date dimension. Standard calendar dimension for time-based analysis."
     meta:
       concept: date
     columns:
       - name: date_sk
-        description: "Surrogate key"
+        description: "Surrogate key for date dimension"
         tests:
           - not_null
           - unique
+      - name: date_day
+        description: "Calendar date (YYYY-MM-DD)"
+      - name: year
+        description: "Calendar year (e.g., 2024)"
+      - name: quarter
+        description: "Calendar quarter (1-4)"
+      - name: month
+        description: "Calendar month (1-12)"
+      - name: week_of_year
+        description: "ISO week number (1-53)"
+      - name: day_of_month
+        description: "Day of month (1-31)"
+      - name: day_of_week
+        description: "Day of week (0=Sunday, 6=Saturday)"
+      - name: day_name
+        description: "Day name (Monday, Tuesday, etc.)"
+      - name: is_weekend
+        description: "Boolean flag for Saturday/Sunday"
 
   - name: fact_orders
-    description: "L2 Integrated orders fact"
+    description: "L2 Integrated orders fact. Enterprise order transactions with conformed dimensions."
     meta:
       concept: orders
     columns:
       - name: order_sk
-        description: "Surrogate key"
+        description: "Surrogate key for order fact"
         tests:
           - not_null
           - unique
       - name: customer_sk
+        description: "Foreign key to dim_customer"
         tests:
           - relationships:
               to: ref('dim_customer')
               field: customer_sk
       - name: order_date_sk
+        description: "Foreign key to dim_date for order date"
         tests:
           - relationships:
               to: ref('dim_date')
               field: date_sk
+      - name: order_source_id
+        description: "Natural key from source system"
+      - name: order_date
+        description: "Date when order was placed"
+      - name: order_status
+        description: "Current order status"
+      - name: line_count
+        description: "Number of line items in order"
+      - name: total_quantity
+        description: "Total units ordered"
+      - name: order_total
+        description: "Total order value in base currency"
+      - name: created_at
+        description: "Timestamp when order was created"
+      - name: updated_at
+        description: "Timestamp of most recent update"
+      - name: deleted_at
+        description: "Soft delete timestamp"
+      - name: is_deleted
+        description: "Boolean flag for cancelled/deleted orders"
 
   - name: fact_customer_engagement
-    description: "L2 Unified engagement fact (web + email)"
+    description: "L2 Unified customer engagement fact. Combines web sessions and email interactions into single engagement stream."
     meta:
       concept: customer_engagement
     columns:
       - name: engagement_sk
-        description: "Surrogate key"
+        description: "Surrogate key for engagement fact"
         tests:
           - not_null
           - unique
       - name: customer_sk
+        description: "Foreign key to dim_customer"
         tests:
           - relationships:
               to: ref('dim_customer')
               field: customer_sk
+      - name: campaign_sk
+        description: "Foreign key to dim_campaign (NULL for web sessions)"
+      - name: engagement_date_sk
+        description: "Foreign key to dim_date"
+      - name: engagement_date
+        description: "Date of engagement activity"
+      - name: engagement_type
+        description: "Type of engagement: 'web_session' or 'email'"
+      - name: engagement_value
+        description: "Numeric engagement score (page views for web, 1/2/3 for email sent/opened/clicked)"
+      - name: session_duration_minutes
+        description: "Session duration in minutes (web sessions only)"
+      - name: opened
+        description: "Email was opened (email engagements only)"
+      - name: clicked
+        description: "Email link was clicked (email engagements only)"
+      - name: created_at
+        description: "Timestamp when engagement was recorded"
+      - name: updated_at
+        description: "Timestamp of most recent update"
 
   - name: obt_customer_360
-    description: "One Big Table: customer with all metrics"
+    description: "One Big Table: Denormalized customer view with all metrics for analytics and reporting. Pre-aggregated for dashboard performance."
     # NOTE: No meta.concept - it's a reporting artifact, not a concept
     columns:
       - name: customer_sk
+        description: "Surrogate key - foreign key to dim_customer"
         tests:
           - not_null
           - unique
+      - name: email
+        description: "Customer email address"
+        meta:
+          pii: true
+      - name: full_name
+        description: "Customer full name"
+        meta:
+          pii: true
+      - name: customer_since
+        description: "Date customer was first created"
+      - name: total_orders
+        description: "Lifetime count of orders placed"
+      - name: lifetime_revenue
+        description: "Total revenue from all orders in base currency"
+      - name: avg_order_value
+        description: "Average order value in base currency"
+      - name: first_order_date
+        description: "Date of first order"
+      - name: last_order_date
+        description: "Date of most recent order"
+      - name: total_engagements
+        description: "Total count of all engagement activities"
+      - name: web_sessions
+        description: "Count of web sessions"
+      - name: emails_received
+        description: "Count of emails sent to customer"
+      - name: emails_opened
+        description: "Count of emails opened by customer"
+      - name: emails_clicked
+        description: "Count of emails with link clicks"
+      - name: customer_segment
+        description: "Derived segment: 'prospect', 'new', 'developing', or 'loyal'"
+      - name: is_deleted
+        description: "Boolean flag for soft deleted customers"
+      - name: updated_at
+        description: "Timestamp of most recent update"
