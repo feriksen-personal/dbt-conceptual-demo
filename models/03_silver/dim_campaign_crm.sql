@@ -1,8 +1,6 @@
 {{
     config(
-        alias='dim_campaign',
-        materialized='incremental',
-        unique_key='campaign_tk'
+        alias='dim_campaign'
     )
 }}
 
@@ -28,5 +26,11 @@ select
     created_at,
     updated_at,
     deleted_at,
-    is_deleted
+    is_deleted,
+    campaign_hd,
+    md5(campaign_tk || '|' || coalesce(cast(deleted_at as varchar), cast(updated_at as varchar), '')) as campaign_hk,
+    cast(coalesce(deleted_at, updated_at, created_at) as date) as valid_from,
+    -- metadata
+    load_ts,
+    record_source
 from source

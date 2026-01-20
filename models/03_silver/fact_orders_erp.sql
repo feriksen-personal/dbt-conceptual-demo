@@ -1,8 +1,6 @@
 {{
     config(
-        alias='fact_orders',
-        materialized='incremental',
-        unique_key='order_tk'
+        alias='fact_orders'
     )
 }}
 
@@ -25,11 +23,25 @@ order_item_agg as (
         sum(line_total) as order_total
     from order_items
     group by order_tk
+),
+
+-- SCD2 dimension lookup: customer
+cte_customer as (
+    select
+        customer_tk,
+        customer_hk,
+        valid_from,
+        coalesce(
+            lead(valid_from) over (partition by customer_tk order by valid_from) - interval '1 day',
+            cast('9999-12-31' as date)
+        ) as valid_to
+    from {{ ref('dim_customer_erp') }}
 )
 
 select
     orders.order_tk,
     orders.customer_tk,
+    cte_customer.customer_hk,
     orders.order_source_id,
     orders.order_date,
     orders.order_status,
@@ -39,7 +51,14 @@ select
     orders.created_at,
     orders.updated_at,
     orders.deleted_at,
-    orders.is_deleted
+    orders.is_deleted,
+    orders.order_hd,
+    -- metadata
+    orders.load_ts,
+    orders.record_source
 from orders
 left join order_item_agg
     on orders.order_tk = order_item_agg.order_tk
+left join cte_customer
+    on orders.customer_tk = cte_customer.customer_tk
+    and orders.order_date between cte_customer.valid_from and cte_customer.valid_to

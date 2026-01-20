@@ -1,8 +1,6 @@
 {{
     config(
-        alias='dim_customer',
-        materialized='incremental',
-        unique_key='customer_tk'
+        alias='dim_customer'
     )
 }}
 
@@ -23,5 +21,11 @@ select
     created_at,
     updated_at,
     deleted_at,
-    is_deleted
+    is_deleted,
+    customer_hd,
+    md5(customer_tk || '|' || coalesce(cast(deleted_at as varchar), cast(updated_at as varchar), '')) as customer_hk,
+    cast(coalesce(deleted_at, updated_at, created_at) as date) as valid_from,
+    -- metadata
+    load_ts,
+    record_source
 from source

@@ -1,8 +1,6 @@
 {{
     config(
-        alias='fact_payments',
-        materialized='incremental',
-        unique_key='payment_tk'
+        alias='fact_payments'
     )
 }}
 
@@ -22,5 +20,9 @@ select
     created_at,
     updated_at,
     deleted_at,
-    is_deleted
+    is_deleted,
+    payment_hd,
+    -- metadata
+    load_ts,
+    record_source
 from source
