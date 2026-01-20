@@ -1,3 +1,2 @@
 dbt-duckdb
 dbt-conceptual
-dbt-source-simulator
