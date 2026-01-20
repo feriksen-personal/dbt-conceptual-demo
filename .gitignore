@@ -18,6 +18,9 @@ venv/
 *.swp
 .DS_Store
 
+# Claude Code
+.claude/
+
 # dbt-conceptual exports
 *.excalidraw
 coverage.html
