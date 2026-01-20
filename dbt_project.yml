@@ -21,38 +21,38 @@ clean-targets:
 vars:
   dbt_conceptual:
     # Directory where conceptual model definition lives
-    conceptual_path: "models/conceptual"
+    conceptual_path: "models/05_conceptual"
 
     # List of folders for staging/silver layer models
     silver_paths:
-      - "models/silver"
+      - "models/03_silver"
 
     # List of folders for gold/marts layer models
     gold_paths:
-      - "models/gold"
+      - "models/04_gold"
 
 # =============================================================================
 # Model configurations
 # =============================================================================
 models:
   dbt_conceptual_demo:
-    bronze:
+    01_bronze:
       +schema: bronze
       +materialized: incremental
       +tags:
         - bronze
         - ingestion
-    staging:
+    02_staging:
       +schema: staging
       +materialized: view
       +tags:
         - staging
-    silver:
+    03_silver:
       +schema: silver
       +materialized: incremental
       +tags:
         - silver
-    gold:
+    04_gold:
       +schema: gold
       +materialized: incremental
       +tags:
