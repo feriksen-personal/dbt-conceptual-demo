@@ -1,10 +1,3 @@
-{{
-    config(
-        alias='dim_date',
-        materialized='table'
-    )
-}}
-
 with date_spine as (
     {{ dbt_utils.date_spine(
         datepart="day",

@@ -54,6 +54,6 @@ models:
         - silver
     04_gold:
       +schema: gold
-      +materialized: incremental
+      +materialized: table
       +tags:
         - gold
