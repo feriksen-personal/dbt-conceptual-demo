@@ -25,3 +25,4 @@ venv/
 *.excalidraw
 coverage.html
 bus-matrix.html
+.user.yml
