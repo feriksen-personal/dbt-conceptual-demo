@@ -11,7 +11,9 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "bastienboutonnet.vscode-dbt",
-        "innoverio.vscode-dbt-power-user"
+        "innoverio.vscode-dbt-power-user",
+        "github.vscode-pull-request-github",
+        "anthropic.claude-code"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python"
