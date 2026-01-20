@@ -1,0 +1,128 @@
+version: 2
+
+sources:
+  - name: jaffle_crm
+    description: >
+      Marketing and CRM system with campaign and engagement tracking data.
+      Managed by dbt-source-simulator package.
+    database: jaffle_crm
+    schema: crm
+
+    tables:
+      - name: campaigns
+        description: >
+          Marketing campaign master data with budgets and dates.
+          Active campaigns have deleted_at IS NULL.
+        columns:
+          - name: campaign_id
+            description: Primary key, unique campaign identifier
+            tests:
+              - unique
+              - not_null
+
+          - name: campaign_name
+            description: Name of the marketing campaign
+
+          - name: start_date
+            description: Campaign start date
+
+          - name: end_date
+            description: Campaign end date
+
+          - name: budget
+            description: Campaign budget
+            tests:
+              - not_null
+
+          - name: created_at
+            description: When campaign record was created
+            tests:
+              - not_null
+
+          - name: updated_at
+            description: When campaign record was last modified (NULL if never updated)
+
+          - name: deleted_at
+            description: Soft delete timestamp (NULL = active, non-NULL = archived)
+
+      - name: email_activity
+        description: >
+          Email engagement event tracking (sent, opened, clicked).
+          Append-only transactional data.
+        columns:
+          - name: activity_id
+            description: Primary key, unique email activity identifier
+            tests:
+              - unique
+              - not_null
+
+          - name: customer_id
+            description: Customer who received the email (references jaffle_shop.customers)
+
+          - name: campaign_id
+            description: Foreign key to campaigns table
+            tests:
+              - not_null
+              - relationships:
+                  to: source('jaffle_crm', 'campaigns')
+                  field: campaign_id
+
+          - name: sent_date
+            description: When email was sent
+
+          - name: opened
+            description: Whether email was opened (boolean)
+
+          - name: clicked
+            description: Whether links in email were clicked (boolean)
+
+          - name: created_at
+            description: When event was recorded
+            tests:
+              - not_null
+
+          - name: updated_at
+            description: When event record was last modified (NULL if never updated, typically append-only)
+
+          - name: deleted_at
+            description: Soft delete timestamp (rarely used, events are immutable)
+
+        freshness:
+          warn_after: {count: 31, period: day}
+
+      - name: web_sessions
+        description: >
+          Website session tracking with page views.
+          Append-only transactional data.
+        columns:
+          - name: session_id
+            description: Primary key, unique session identifier
+            tests:
+              - unique
+              - not_null
+
+          - name: customer_id
+            description: Customer who visited (references jaffle_shop.customers)
+
+          - name: session_start
+            description: When session started
+
+          - name: session_end
+            description: When session ended
+
+          - name: page_views
+            description: Number of pages viewed in session
+
+          - name: created_at
+            description: When session was recorded
+            tests:
+              - not_null
+
+          - name: updated_at
+            description: When session record was last modified (NULL if never updated, could update if session extends)
+
+          - name: deleted_at
+            description: Soft delete timestamp (rarely used)
+
+        freshness:
+          warn_after: {count: 31, period: day}

@@ -1,0 +1,221 @@
+version: 2
+
+sources:
+  - name: jaffle_shop
+    description: >
+      E-commerce and order management system with transactional data.
+      Managed by dbt-source-simulator package.
+    database: jaffle_shop
+    schema: erp
+
+    tables:
+      - name: customers
+        description: >
+          Customer master data with soft delete pattern.
+          Active customers have deleted_at IS NULL.
+        columns:
+          - name: customer_id
+            description: Primary key, unique customer identifier
+            tests:
+              - unique
+              - not_null
+
+          - name: first_name
+            description: Customer's first name
+
+          - name: last_name
+            description: Customer's last name
+
+          - name: email
+            description: Customer's email address
+            tests:
+              - not_null
+
+          - name: created_at
+            description: When customer record was created
+            tests:
+              - not_null
+
+          - name: updated_at
+            description: When customer record was last modified (NULL if never updated)
+
+          - name: deleted_at
+            description: Soft delete timestamp (NULL = active, non-NULL = deleted)
+
+        freshness:
+          warn_after: {count: 31, period: day}
+          error_after: {count: 35, period: day}
+
+      - name: products
+        description: >
+          Product catalog with soft delete pattern.
+          Active products have deleted_at IS NULL (discontinued products have a timestamp).
+        columns:
+          - name: product_id
+            description: Primary key, unique product identifier
+            tests:
+              - unique
+              - not_null
+
+          - name: name
+            description: Product name
+
+          - name: category
+            description: Product category
+
+          - name: price
+            description: Product price
+            tests:
+              - not_null
+
+          - name: created_at
+            description: When product record was created
+            tests:
+              - not_null
+
+          - name: updated_at
+            description: When product record was last modified (NULL if never updated)
+
+          - name: deleted_at
+            description: Soft delete timestamp (NULL = active, non-NULL = discontinued)
+
+      - name: orders
+        description: >
+          Order headers with status tracking.
+          Statuses include: pending, processing, shipped, delivered, cancelled.
+        columns:
+          - name: order_id
+            description: Primary key, unique order identifier
+            tests:
+              - unique
+              - not_null
+
+          - name: customer_id
+            description: Foreign key to customers table
+            tests:
+              - not_null
+              - relationships:
+                  to: source('jaffle_shop', 'customers')
+                  field: customer_id
+
+          - name: order_date
+            description: Date when order was placed
+
+          - name: status
+            description: Order status (pending, processing, shipped, delivered, cancelled)
+            tests:
+              - accepted_values:
+                  values: ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
+
+          - name: created_at
+            description: When order record was created
+            tests:
+              - not_null
+
+          - name: updated_at
+            description: When order record was last modified (e.g., status changes)
+            tests:
+              - not_null
+
+          - name: deleted_at
+            description: Soft delete timestamp (NULL = active, non-NULL = cancelled/deleted)
+
+        freshness:
+          warn_after: {count: 31, period: day}
+          error_after: {count: 35, period: day}
+
+      - name: order_items
+        description: >
+          Order line items linking products to orders with quantities and pricing.
+          Typically append-only (line items are immutable once created).
+        columns:
+          - name: order_item_id
+            description: Primary key, unique order item identifier
+            tests:
+              - unique
+              - not_null
+
+          - name: order_id
+            description: Foreign key to orders table
+            tests:
+              - not_null
+              - relationships:
+                  to: source('jaffle_shop', 'orders')
+                  field: order_id
+
+          - name: product_id
+            description: Foreign key to products table
+            tests:
+              - not_null
+              - relationships:
+                  to: source('jaffle_shop', 'products')
+                  field: product_id
+
+          - name: quantity
+            description: Quantity of product ordered
+            tests:
+              - not_null
+
+          - name: unit_price
+            description: Price per unit at time of order
+            tests:
+              - not_null
+
+          - name: created_at
+            description: When order item was created
+            tests:
+              - not_null
+
+          - name: updated_at
+            description: When order item was last modified (NULL if never updated, typically immutable)
+
+          - name: deleted_at
+            description: Soft delete timestamp (rarely used, line items typically immutable)
+
+        freshness:
+          warn_after: {count: 31, period: day}
+
+      - name: payments
+        description: >
+          Payment records for orders.
+          Added in delta files (not present in baseline).
+          Typically append-only transactional data.
+        columns:
+          - name: payment_id
+            description: Primary key, unique payment identifier
+            tests:
+              - unique
+              - not_null
+
+          - name: order_id
+            description: Foreign key to orders table
+            tests:
+              - not_null
+              - relationships:
+                  to: source('jaffle_shop', 'orders')
+                  field: order_id
+
+          - name: payment_method
+            description: Payment method (credit_card, debit_card, bank_transfer, cash)
+            tests:
+              - accepted_values:
+                  values: ['credit_card', 'debit_card', 'bank_transfer', 'cash']
+
+          - name: amount
+            description: Payment amount
+            tests:
+              - not_null
+
+          - name: created_at
+            description: When payment was created
+            tests:
+              - not_null
+
+          - name: updated_at
+            description: When payment record was last modified (NULL if never updated, typically append-only)
+
+          - name: deleted_at
+            description: Soft delete timestamp (rarely used)
+
+        freshness:
+          warn_after: {count: 31, period: day}
